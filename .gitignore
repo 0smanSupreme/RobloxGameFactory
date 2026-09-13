@@ -1,0 +1,17 @@
+# Secrets / local config
+.env
+
+# User must create this from the example.
+config/staging_slots.json
+
+# Build output
+build/*.rbxl
+build/*.rbxlx
+
+# Generated current job
+generated/current/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/

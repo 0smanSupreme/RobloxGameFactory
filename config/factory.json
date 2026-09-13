@@ -1,0 +1,8 @@
+{
+  "games_per_day": 5,
+  "publish_private_only": true,
+  "master_path": "master/SurviveTemplate_FIXED.rbxl",
+  "generated_dir": "generated/current",
+  "build_path": "build/generated_game.rbxl",
+  "staging_slot_file": "config/staging_slots.json"
+}
