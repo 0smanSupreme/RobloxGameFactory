@@ -1,6 +1,6 @@
-name: Codex Roblox Build
+name: Gemini Roblox Build
 
-run-name: "Codex Roblox build [${{ inputs.run_id }}]"
+run-name: "Gemini Roblox build [${{ inputs.run_id }}]"
 
 on:
   workflow_dispatch:
@@ -29,7 +29,7 @@ on:
         default: ""
         type: string
       max_repair_attempts:
-        description: Maximum Codex validation/repair passes
+        description: Maximum Gemini validation/repair passes
         required: false
         default: "3"
         type: string
@@ -43,12 +43,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: codex-roblox-${{ inputs.run_id }}
+  group: gemini-roblox-${{ inputs.run_id }}
   cancel-in-progress: false
 
 jobs:
   generate:
-    name: Generate Roblox hazard with Codex
+    name: Generate Roblox hazard with Gemini
     runs-on: ubuntu-latest
     timeout-minutes: ${{ fromJSON(inputs.max_build_minutes) }}
 
@@ -111,13 +111,23 @@ jobs:
           path.write_text(json.dumps(context, indent=2), encoding="utf-8")
           PY
 
+      - name: Verify Gemini API key
+        shell: bash
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "${GEMINI_API_KEY}" || {
+            echo "Missing GitHub secret GEMINI_API_KEY" >&2
+            exit 1
+          }
+
       - name: Generate the game variation
-        id: codex
-        uses: openai/codex-action@v1
+        id: gemini
+        uses: google-github-actions/run-gemini-cli@v0
         with:
-          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
-          sandbox: workspace-write
-          safety-strategy: drop-sudo
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_debug: false
           prompt: |
             Build the single Roblox game variation described by
             generated/current/job_context.json.
@@ -233,7 +243,7 @@ jobs:
           cat > build/TestingReport.md <<'REPORT'
           # Roblox build validation report
 
-          - Codex generated the manifest and Lune transformation script.
+          - Gemini CLI generated the manifest and Lune transformation script.
           - `tools/validate_generated.py` passed.
           - The hazard was applied to a copy of the immutable fixed master.
           - `tools/validate_place.luau` passed structural validation.
@@ -283,7 +293,7 @@ jobs:
           report = {
               "status": "PASSED_STATIC_VALIDATION",
               "testing_summary": (
-                  "Codex generation, generated-source validation, Lune place "
+                  "Gemini generation, generated-source validation, Lune place "
                   "transformation, and static place validation all passed."
               ),
               "known_limitations": [
